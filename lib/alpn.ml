@@ -31,8 +31,8 @@ type http_1_1_protocol =
      with type t = Httpaf.Reqd.t
       and type request = Httpaf.Request.t
       and type response = Httpaf.Response.t
-      and type Body.ro = [ `read ] Httpaf.Body.t
-      and type Body.wo = [ `write ] Httpaf.Body.t)
+      and type Body.ro = Httpaf.Body.Reader.t
+      and type Body.wo = Httpaf.Body.Writer.t)
 
 type h2_protocol =
   (module REQD
@@ -49,8 +49,8 @@ type ('reqd, 'headers, 'request, 'response, 'ro, 'wo) protocol =
            Httpaf.Headers.t,
            Httpaf.Request.t,
            Httpaf.Response.t,
-           [ `read ] Httpaf.Body.t,
-           [ `write ] Httpaf.Body.t )
+           Httpaf.Body.Reader.t,
+           Httpaf.Body.Writer.t )
          protocol
   | H2 :
       h2_protocol
@@ -70,8 +70,8 @@ let http_1_1 =
     type response = Httpaf.Response.t
 
     module Body = struct
-      type ro = [ `read ] Httpaf.Body.t
-      type wo = [ `write ] Httpaf.Body.t
+      type ro = Httpaf.Body.Reader.t
+      type wo = Httpaf.Body.Writer.t
     end
 
     let respond_with_streaming t ?flush_headers_immediately response =
@@ -81,8 +81,8 @@ let http_1_1 =
     with type t = Httpaf.Reqd.t
      and type request = Httpaf.Request.t
      and type response = Httpaf.Response.t
-     and type Body.ro = [ `read ] Httpaf.Body.t
-     and type Body.wo = [ `write ] Httpaf.Body.t)
+     and type Body.ro = Httpaf.Body.Reader.t
+     and type Body.wo = Httpaf.Body.Writer.t)
 
 let h2 =
   let module M = struct
@@ -213,7 +213,7 @@ type 'edn client_handler = {
 
 type alpn_response =
   | Response_HTTP_1_1 :
-      ([ `write ] Httpaf.Body.t * Httpaf.Client_connection.t)
+      (Httpaf.Body.Writer.t * Httpaf.Client_connection.t)
       -> alpn_response
   | Response_H2 : H2.Body.Writer.t * H2.Client_connection.t -> alpn_response
 
@@ -237,8 +237,11 @@ let run ?alpn handler edn request flow =
         handler.error edn (HTTP_1_1 http_1_1) (to_client_error_v1 error) in
       let response_handler response body =
         handler.response flow edn response body (HTTP_1_1 http_1_1) in
-      let body, conn =
-        Httpaf.Client_connection.request request ~error_handler
+      let conn =
+        Httpaf.Client_connection.create ?config:None ()
+      in
+      let body =
+        Httpaf.Client_connection.request conn request ~error_handler
           ~response_handler in
       Lwt.async (fun () -> Paf.run (module Httpaf_Client_connection) conn flow) ;
       Lwt.return_ok (Response_HTTP_1_1 (body, conn))
