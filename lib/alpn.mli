@@ -37,11 +37,19 @@ end
 
 type http_1_1_protocol =
   (module REQD
+<<<<<<< HEAD
      with type t = H1.Reqd.t
       and type request = H1.Request.t
       and type response = H1.Response.t
       and type Body.ro = H1.Body.Reader.t
       and type Body.wo = H1.Body.Writer.t)
+=======
+     with type t = Httpaf.Reqd.t
+      and type request = Httpaf.Request.t
+      and type response = Httpaf.Response.t
+      and type Body.ro = Httpaf.Body.Reader.t
+      and type Body.wo = Httpaf.Body.Writer.t)
+>>>>>>> 947af4b (adapt to anmonteiro's httpaf)
 
 type h2_protocol =
   (module REQD
@@ -54,12 +62,21 @@ type h2_protocol =
 type ('reqd, 'headers, 'request, 'response, 'ro, 'wo) protocol =
   | HTTP_1_1 :
       http_1_1_protocol
+<<<<<<< HEAD
       -> ( H1.Reqd.t,
            H1.Headers.t,
            H1.Request.t,
            H1.Response.t,
            H1.Body.Reader.t,
            H1.Body.Writer.t )
+=======
+      -> ( Httpaf.Reqd.t,
+           Httpaf.Headers.t,
+           Httpaf.Request.t,
+           Httpaf.Response.t,
+           Httpaf.Body.Reader.t,
+           Httpaf.Body.Writer.t )
+>>>>>>> 947af4b (adapt to anmonteiro's httpaf)
          protocol
   | H2 :
       h2_protocol
@@ -72,12 +89,21 @@ type ('reqd, 'headers, 'request, 'response, 'ro, 'wo) protocol =
          protocol
 
 val http_1_1 :
+<<<<<<< HEAD
   ( H1.Reqd.t,
     H1.Headers.t,
     H1.Request.t,
     H1.Response.t,
     H1.Body.Reader.t,
     H1.Body.Writer.t )
+=======
+  ( Httpaf.Reqd.t,
+    Httpaf.Headers.t,
+    Httpaf.Request.t,
+    Httpaf.Response.t,
+    Httpaf.Body.Reader.t,
+    Httpaf.Body.Writer.t )
+>>>>>>> 947af4b (adapt to anmonteiro's httpaf)
   protocol
 
 val h2 :
@@ -263,7 +289,11 @@ type 'edn client_handler = {
 
 type alpn_response =
   | Response_HTTP_1_1 :
+<<<<<<< HEAD
       (H1.Body.Writer.t * H1.Client_connection.t)
+=======
+      (Httpaf.Body.Writer.t * Httpaf.Client_connection.t)
+>>>>>>> 947af4b (adapt to anmonteiro's httpaf)
       -> alpn_response
   | Response_H2 : H2.Body.Writer.t * H2.Client_connection.t -> alpn_response
 

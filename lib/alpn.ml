@@ -28,11 +28,11 @@ end
 
 type http_1_1_protocol =
   (module REQD
-     with type t = H1.Reqd.t
-      and type request = H1.Request.t
-      and type response = H1.Response.t
-      and type Body.ro = H1.Body.Reader.t
-      and type Body.wo = H1.Body.Writer.t)
+     with type t = Httpaf.Reqd.t
+      and type request = Httpaf.Request.t
+      and type response = Httpaf.Response.t
+      and type Body.ro = Httpaf.Body.Reader.t
+      and type Body.wo = Httpaf.Body.Writer.t)
 
 type h2_protocol =
   (module REQD
@@ -45,12 +45,12 @@ type h2_protocol =
 type ('reqd, 'headers, 'request, 'response, 'ro, 'wo) protocol =
   | HTTP_1_1 :
       http_1_1_protocol
-      -> ( H1.Reqd.t,
-           H1.Headers.t,
-           H1.Request.t,
-           H1.Response.t,
-           H1.Body.Reader.t,
-           H1.Body.Writer.t )
+      -> ( Httpaf.Reqd.t,
+           Httpaf.Headers.t,
+           Httpaf.Request.t,
+           Httpaf.Response.t,
+           Httpaf.Body.Reader.t,
+           Httpaf.Body.Writer.t )
          protocol
   | H2 :
       h2_protocol
@@ -70,19 +70,19 @@ let http_1_1 =
     type response = H1.Response.t
 
     module Body = struct
-      type ro = H1.Body.Reader.t
-      type wo = H1.Body.Writer.t
+      type ro = Httpaf.Body.Reader.t
+      type wo = Httpaf.Body.Writer.t
     end
 
     let respond_with_streaming t ?flush_headers_immediately response =
       respond_with_streaming t ?flush_headers_immediately response
   end in
   (module M : REQD
-    with type t = H1.Reqd.t
-     and type request = H1.Request.t
-     and type response = H1.Response.t
-     and type Body.ro = H1.Body.Reader.t
-     and type Body.wo = H1.Body.Writer.t)
+    with type t = Httpaf.Reqd.t
+     and type request = Httpaf.Request.t
+     and type response = Httpaf.Response.t
+     and type Body.ro = Httpaf.Body.Reader.t
+     and type Body.wo = Httpaf.Body.Writer.t)
 
 let h2 =
   let module M = struct
@@ -240,7 +240,7 @@ end
 
 type alpn_response =
   | Response_HTTP_1_1 :
-      (H1.Body.Writer.t * H1.Client_connection.t)
+      (Httpaf.Body.Writer.t * Httpaf.Client_connection.t)
       -> alpn_response
   | Response_H2 : H2.Body.Writer.t * H2.Client_connection.t -> alpn_response
 
@@ -264,10 +264,11 @@ let run ?alpn handler edn request flow =
         handler.error edn (HTTP_1_1 http_1_1) (to_client_error_v1 error) in
       let response_handler response body =
         handler.response flow edn response body (HTTP_1_1 http_1_1) in
-      let body, conn =
-        H1.Client_connection.request request ~error_handler ~response_handler
-      in
-      Lwt.async (fun () -> Paf.run (module H1_Client_connection) conn flow) ;
+      let conn = Httpaf.Client_connection.create ?config:None () in
+      let body =
+        Httpaf.Client_connection.request conn request ~error_handler
+          ~response_handler in
+      Lwt.async (fun () -> Paf.run (module Httpaf_Client_connection) conn flow) ;
       Lwt.return_ok (Response_HTTP_1_1 (body, conn))
   | Some protocol, _ ->
       Lwt.return_error
