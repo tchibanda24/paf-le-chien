@@ -1,3 +1,7 @@
+module Httpaf = Dream_httpaf_.Httpaf
+module H2 = Dream_h2.H2
+module Paf = Dream_paf.Paf
+
 let src = Logs.Src.create "paf-alpn"
 
 module Log = (val Logs.src_log src : Logs.LOG)

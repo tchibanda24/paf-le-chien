@@ -11,6 +11,10 @@
     In other words, [Alpn] did the only choice to trust on [http/af] & [h2] to
     handle HTTP/1.0, HTTP/1.1 and H2 protocols. *)
 
+module Httpaf = Dream_httpaf_.Httpaf
+module H2 = Dream_h2.H2
+module Paf = Dream_paf.Paf
+
 module type REQD = sig
   type t
   type request
