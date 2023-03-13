@@ -1,3 +1,8 @@
+module Httpaf = Dream_httpaf_.Httpaf
+module H2 = Dream_h2.H2
+module Paf = Dream_paf.Paf
+module Alpn = Dream_alpn.Alpn
+
 module type S = sig
   type stack
   (** The type of the TCP/IP stack. *)
