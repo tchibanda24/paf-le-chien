@@ -65,7 +65,10 @@ module type S = sig
       flow ->
       (unit, [ write_error | `Msg of string ]) result Lwt.t
 
-    val key_update : ?request:bool -> flow ->
+
+    val key_update :
+      ?request:bool ->
+      flow ->
       (unit, [ write_error | `Msg of string ]) result Lwt.t
 
     val server_of_flow :

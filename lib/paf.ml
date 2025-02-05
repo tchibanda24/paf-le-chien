@@ -147,7 +147,7 @@ module Make (Flow : Mirage_flow.S) = struct
             (List.fold_left (fun acc cs -> acc + Cstruct.length cs) 0 iovecs))
     | Error err ->
         Log_flow.err (fun m ->
-            m "Got an errror when we wrote something: %a." Flow.pp_write_error
+            m "Got an error when we wrote something: %a." Flow.pp_write_error
               err) ;
         report_error err ;
         flow.wr_closed <- true ;
@@ -206,8 +206,7 @@ end = struct
         | `Close ->
             Log_server.debug (fun m -> m "next read operation: `close") ;
             Lwt.wakeup_later notify_rd_exit () ;
-            flow.Easy_flow.rd_closed <- true ;
-            Easy_flow.safely_close flow in
+            Flow.shutdown flow.flow `read in
       Lwt.async @@ fun () ->
       Lwt.catch go (fun exn ->
           Runtime.report_exn connection exn ;
@@ -230,8 +229,7 @@ end = struct
         | `Close _ ->
             Log_server.debug (fun m -> m "next write operation: `close") ;
             Lwt.wakeup_later notify_wr_exit () ;
-            flow.Easy_flow.wr_closed <- true ;
-            Easy_flow.safely_close flow in
+            Flow.shutdown flow.flow `write in
       Lwt.async @@ fun () ->
       Lwt.catch go (fun exn ->
           (* Runtime.report_write_result connection `Closed ; *)
