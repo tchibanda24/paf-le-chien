@@ -1,8 +1,3 @@
-module Httpaf = Dream_httpaf_.Httpaf
-module H2 = Dream_h2.H2
-module Paf = Dream_paf.Paf
-module Alpn = Dream_alpn.Alpn
-
 module type S = sig
   type stack
   type ipaddr
@@ -38,7 +33,6 @@ module type S = sig
       ?drop:bool ->
       flow ->
       (unit, [ write_error | `Msg of string ]) result Lwt.t
-
 
     val key_update :
       ?request:bool ->
@@ -189,7 +183,7 @@ module Make (Stack : Tcpip.Tcp.S) :
       reneg ?authenticator ?acceptable_cas ?cert ?drop tls_flow
 
     let key_update ?request (_, tls_flow) = key_update ?request tls_flow
-    
+
     let server_of_flow config tcp_flow =
       Lwt_result.Infix.(
         server_of_flow config tcp_flow >>= fun tls_flow ->

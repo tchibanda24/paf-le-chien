@@ -11,10 +11,6 @@
     In other words, [Alpn] did the only choice to trust on [http/af] & [h2] to
     handle HTTP/1.0, HTTP/1.1 and H2 protocols. *)
 
-module Httpaf = Dream_httpaf_.Httpaf
-module H2 = Dream_h2.H2
-module Paf = Dream_paf.Paf
-
 module type REQD = sig
   type t
   type request
@@ -44,8 +40,8 @@ type http_1_1_protocol =
      with type t = Httpaf.Reqd.t
       and type request = Httpaf.Request.t
       and type response = Httpaf.Response.t
-      and type Body.ro = Httpaf.Body.Reader.t
-      and type Body.wo = Httpaf.Body.Writer.t)
+      and type Body.ro = [ `read ] Httpaf.Body.t
+      and type Body.wo = [ `write ] Httpaf.Body.t)
 
 type h2_protocol =
   (module REQD
@@ -62,8 +58,8 @@ type ('reqd, 'headers, 'request, 'response, 'ro, 'wo) protocol =
            Httpaf.Headers.t,
            Httpaf.Request.t,
            Httpaf.Response.t,
-           Httpaf.Body.Reader.t,
-           Httpaf.Body.Writer.t )
+           [ `read ] Httpaf.Body.t,
+           [ `write ] Httpaf.Body.t )
          protocol
   | H2 :
       h2_protocol
@@ -80,8 +76,8 @@ val http_1_1 :
     Httpaf.Headers.t,
     Httpaf.Request.t,
     Httpaf.Response.t,
-    Httpaf.Body.Reader.t,
-    Httpaf.Body.Writer.t )
+    [ `read ] Httpaf.Body.t,
+    [ `write ] Httpaf.Body.t )
   protocol
 
 val h2 :
@@ -267,7 +263,7 @@ type 'edn client_handler = {
 
 type alpn_response =
   | Response_HTTP_1_1 :
-      (Httpaf.Body.Writer.t * Httpaf.Client_connection.t)
+      ([ `write ] Httpaf.Body.t * Httpaf.Client_connection.t)
       -> alpn_response
   | Response_H2 : H2.Body.Writer.t * H2.Client_connection.t -> alpn_response
 
